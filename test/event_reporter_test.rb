@@ -47,6 +47,19 @@ class EventReporterTest < MiniTest::Test
 
   def test_it_returns_queue_print_by_attribute_description_when_help_queue_print_attribute
     commands = "help queue print by <attribute>"
-     er = EventReporter.new
- end
+    er = EventReporter.new
+    assert_equal "Print out a tab-delimited data table sorted by selected attribute:\nLAST NAME\nFIRST NAME\nEMAIL\nZIPCODE\nCITY\nSTATE\nADDRESS\nPHONE", er.command(commands)
+  end
+
+  def test_it_returns_queue_save_to_filname_csv_description_when_help_queue_save_to_filenam_csv
+    commands = "help queue save to <filename.csv>"
+    er = EventReporter.new
+    assert_equal "Export the current queue to the specified filename as a CSV. The file should should include data and headers for last name, first name, email, zipcode, city, state, address, and phone number.", er.command(commands)
+  end
+
+  def test_it_returns_find_attribute_criteria_description_when_help_find_attribute_criteria
+    commands = "help find <attribute> <criteria>"
+    er = EventReporter.new
+    assert_equal "Loads the queue with all records matching the criteria(case sensitive) for the given attribute:\nLAST NAME\nFIRST NAME\nEMAIL\nZIPCODE\nCITY\nSTATE\nADDRESS\nPHONE", er.command(commands)
+  end
 end
