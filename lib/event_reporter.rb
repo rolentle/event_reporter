@@ -1,6 +1,17 @@
 class EventReporter
-  def command(command)
-    if  command == "help"
+  def command(input)
+    comand = input[0]
+    if command = "help"
+      help_router(input)
+    elsif command == "load race_horses.csv"
+      "loading race_horses.csv"
+    else 
+      "That is an invalid command see 'help' for list off all commands"
+    end
+  end
+
+  def help_router(command)
+     if  command == "help"
       "load <filename>\nhelp\nhelp <command>\nqueue count\nqueue clear\nqueue print\nqueue print by <attribute>\nqueue save to <filename.csv>\nfind <attribute> <criteria>" 
     elsif command == "help load <filename>"
       "Erase any loaded data and parse the specified file. If no filename is given, default to event_attendees.csv."
@@ -17,5 +28,5 @@ class EventReporter
     elsif command == "help find <attribute> <criteria>"
       "Loads the queue with all records matching the criteria(case sensitive) for the given attribute:\nLAST NAME\nFIRST NAME\nEMAIL\nZIPCODE\nCITY\nSTATE\nADDRESS\nPHONE"
     end
-  end
+  end  
 end

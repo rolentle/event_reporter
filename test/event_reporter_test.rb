@@ -62,4 +62,18 @@ class EventReporterTest < MiniTest::Test
     er = EventReporter.new
     assert_equal "Loads the queue with all records matching the criteria(case sensitive) for the given attribute:\nLAST NAME\nFIRST NAME\nEMAIL\nZIPCODE\nCITY\nSTATE\nADDRESS\nPHONE", er.command(commands)
   end
+ 
+  def test_load_filename_is_valid
+    filename = "race_horses.csv"
+    commands = "load #{filename}"
+    er = EventReporter.new
+    assert_equal "loading race_horses.csv", er.command(commands)
+  end   
+  
+  def test_load_filename_parse_data
+    skip
+    filename = "sample_event_attendees.csv"
+    command  = "load #{filename}"
+    er = EventReporter.new
+  end
 end
