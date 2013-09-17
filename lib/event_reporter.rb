@@ -1,10 +1,14 @@
+require 'CSV'
+
 class EventReporter
   def command(input)
-    comand = input[0]
-    if command = "help"
+    words = input.split(" ")
+    command = words[0]
+    if command == "help"
       help_router(input)
-    elsif command == "load race_horses.csv"
-      "loading race_horses.csv"
+    elsif command == "load"
+     # return "loading #{words[1]}"
+     file_loader(words[1]) 
     else 
       "That is an invalid command see 'help' for list off all commands"
     end
@@ -28,5 +32,9 @@ class EventReporter
     elsif command == "help find <attribute> <criteria>"
       "Loads the queue with all records matching the criteria(case sensitive) for the given attribute:\nLAST NAME\nFIRST NAME\nEMAIL\nZIPCODE\nCITY\nSTATE\nADDRESS\nPHONE"
     end
+  end
+
+  def file_loader(filename)
+    loaded_file = CSV.open filename, headers: true, header_converters: :symbol
   end  
 end

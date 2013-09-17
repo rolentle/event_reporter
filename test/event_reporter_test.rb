@@ -15,7 +15,7 @@ class EventReporterTest < MiniTest::Test
     assert_equal "help", er.command(command_help)
   end
  
-  def test_it_returns_commands_when_commanded
+  def test_it_returns_commands_when_command_help
     commands = "load <filename>\nhelp\nhelp <command>\nqueue count\nqueue clear\nqueue print\nqueue print by <attribute>\nqueue save to <filename.csv>\nfind <attribute> <criteria>"
     er = EventReporter.new
     assert_equal commands, er.command("help")
@@ -64,6 +64,7 @@ class EventReporterTest < MiniTest::Test
   end
  
   def test_load_filename_is_valid
+    skip
     filename = "race_horses.csv"
     commands = "load #{filename}"
     er = EventReporter.new
@@ -71,9 +72,9 @@ class EventReporterTest < MiniTest::Test
   end   
   
   def test_load_filename_parse_data
-    skip
     filename = "sample_event_attendees.csv"
-    command  = "load #{filename}"
+    commands  = "load #{filename}"
     er = EventReporter.new
+    assert_equal "Allison", er.command(commands).first[:first_name]
   end
 end
