@@ -1,14 +1,23 @@
 require 'CSV'
 
 class EventReporter
+ attr_accessor :queue
+
+  def initialize
+   @queue = Array.new 
+  end
   def command(input)
     words = input.split(" ")
     command = words[0]
     if command == "help"
       help_router(input)
     elsif command == "load"
-     # return "loading #{words[1]}"
-     file_loader(words[1]) 
+      # return "loading #{words[1]}"
+      file_loader(words[1]) 
+    elsif command == "queue"
+      queue_count
+    elsif command == "find"
+      find(words[1], words[2])
     else 
       "That is an invalid command see 'help' for list off all commands"
     end
@@ -35,6 +44,17 @@ class EventReporter
   end
 
   def file_loader(filename)
-    loaded_file = CSV.open filename, headers: true, header_converters: :symbol
+    filename ||= "event_attendees.csv" 
+    input_file = CSV.open filename, headers: true, header_converters: :symbol
+    @csv = Attendee.new(input_file)
   end  
+
+  def queue_count
+   queue.count.to_s
+  end
+
+  def find(attribute, criteria)
+    criteria = criteria.to_s.downcase.rstrip
+   @queue = @csv.find_all { |row| row[attribute.to_sym] == criteria }
+  end
 end

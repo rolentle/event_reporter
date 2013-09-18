@@ -1,6 +1,7 @@
 require 'minitest'
 require 'minitest/autorun'
 require './lib/event_reporter'
+require 'minitest/pride'
 
 class EventReporterTest < MiniTest::Test
   def test_it_exists
@@ -76,5 +77,50 @@ class EventReporterTest < MiniTest::Test
     commands  = "load #{filename}"
     er = EventReporter.new
     assert_equal "Allison", er.command(commands).first[:first_name]
+  end
+  
+  def test_it_loads_event_attendees_csv_as_default
+    command = "load"
+    er = EventReporter.new
+    assert_equal "event_attendees.csv", er.command(command).path 
+  end  
+
+  def test_queue_count_is_a_valid_command
+    skip
+    command =  "queue count"
+    er = EventReporter.new
+    assert_equal "queue count", er.command(command)
+  end
+
+  def test_queue_count_returns_row_count
+    er = EventReporter.new
+    er.command("load sample_event_attendees.csv")
+    assert_equal "0", er.command("queue count")
+  end
+
+  def test_queue_count_for_defaults
+    er = EventReporter.new
+    er.command("load")
+    assert_equal "0", er.command("queue count")
+  end
+
+  def test_find_attribute_criteria_is_valid
+    skip
+    er = EventReporter.new
+    assert_equal "finding first_name john", er.command("find first_name John")
+  end
+
+  def test_queue_count_for_find_id_3
+    er = EventReporter.new
+    er.command("load")
+    er.command("find id 3 " )
+    assert_equal "1", er.command("queue count")
+  end
+  
+  def test_queue_count_for_find_first_name_john
+    er = EventReporter.new
+    er.command("load")
+    er.command("find first_name John " )
+    assert_equal "63", er.command("queue count")
   end
 end
