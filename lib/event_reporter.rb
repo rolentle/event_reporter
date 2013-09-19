@@ -7,6 +7,17 @@ class EventReporter
   def initialize
    @queue = {} 
   end
+
+  def run
+    puts "Welcome to Event Reporter"
+    input = "" 
+    while input != 'quit'
+      print "Enter command:"
+      input = gets.chomp
+      command(input)
+    end
+  end
+
   def command(input)
     words = input.split(" ")
     command = words[0]
@@ -18,7 +29,9 @@ class EventReporter
     elsif command == "queue"
       queue_router(input)
     elsif command == "find"
-      find(words[1], words[2])
+      find(words[1], words[2..-1].join(''))
+    elsif command == 'quit'
+      'Thank you for using Event Reporter'
     else 
       "That is an invalid command see 'help' for list off all commands"
     end
@@ -29,8 +42,13 @@ class EventReporter
        queue_count
      elsif input == 'queue clear'
        queue_clear
-     elsif input == 'queue print'
-       queue_print
+     elsif input.include? 'queue print'
+       words = input.split(' ')
+         if words.length == 2
+           queue_print
+         else
+           queue_print_by(words[-1])
+         end
      elsif input.start_with?('queue save to')
        queue_save_to(input.split(' ')[-1])
      else
@@ -48,13 +66,13 @@ class EventReporter
     elsif command == "help queue clear"
       "Empties the queue."
     elsif command == "help queue print"
-      "Print out a tab-delimited data table with a header row following this format:\nLAST NAME\tFIRST NAME\tEMAIL\tZIPCODE\tCITY\tSTATE\tADDRESS\tPHONE"
+      "Print out a tab-delimited data table with a header row following this format:\nlast_name\nfirst_name\nemail_address\nzipcode\ncity\nstate\nstreet\nphone"
     elsif command == "help queue print by <attribute>"
-      "Print out a tab-delimited data table sorted by selected attribute:\nLAST NAME\nFIRST NAME\nEMAIL\nZIPCODE\nCITY\nSTATE\nADDRESS\nPHONE"
+      "Print out a tab-delimited data table sorted by selected attribute:\nlast_name\nfirst_name\nemail_address\nzipcode\ncity\nstate\nstreet\nphone"
     elsif command == "help queue save to <filename.csv>"
       "Export the current queue to the specified filename as a CSV. The file should should include data and headers for last name, first name, email, zipcode, city, state, address, and phone number."
     elsif command == "help find <attribute> <criteria>"
-      "Loads the queue with all records matching the criteria(case sensitive) for the given attribute:\nLAST NAME\nFIRST NAME\nEMAIL\nZIPCODE\nCITY\nSTATE\nADDRESS\nPHONE"
+      "Loads the queue with all records matching the criteria(case sensitive) for the given attribute:\nlast_name\nfirst_name\nemail_address\nzipcode\ncity\nstate\nstreet\nphone"
     end
   end
 
@@ -62,7 +80,7 @@ class EventReporter
     filename ||= "event_attendees.csv"
   
     input_file = CSV.read filename, headers: true, header_converters: :symbol
-    @loaded_array = map_csv_attendees_instant_variables_to_hash(input_file)
+  return  @loaded_array = map_csv_attendees_instant_variables_to_hash(input_file)
   end  
 
   def map_csv_attendees_instant_variables_to_hash(csv_file)
@@ -81,20 +99,21 @@ class EventReporter
   end
 
   def queue_print
-     header = "\t#{'LAST NAME'.center(12, ' ')}\t#{'FIRST NAME'.center(12, ' ')}\t#{'EMAIL'.center(44, ' ')}\t#{'ZIPCODE'.center(12, ' ')}\t#{'CITY'.center(12, ' ')}\t#{'STATE'.center(12, ' ')}\t#{'ADDRESS'.center(40, ' ')}\t#{'PHONE'.center(12, ' ')}"
+     header = "\t#{'last_name'.center(12, ' ')}\t#{'first_name'.center(12, ' ')}\t#{'email_address'.center(44, ' ')}\t#{'zipcode'.center(12, ' ')}\t#{'city'.center(12, ' ')}\t#{'state'.center(12, ' ')}\t#{'street'.center(40, ' ')}\t#{'homephone'.center(12, ' ')}"
       data = queue.collect do |row|
       "\t#{row['last_name'].center(12, ' ')}\t#{row['first_name'].center(12, ' ')}\t#{row['email_address'].center(44, ' ')}\t#{row['zipcode'].center(12, ' ')}\t#{row['city'].center(12, ' ')}\t#{row['state'].center(12, ' ')}\t#{row['street'].center(40, ' ')}\t#{row['homephone'].center(12, ' ')}"
     end
-   
     results = header + "\n" + data.join("\n")
+    puts results
     return results
   end
 
   def queue_print_by(attribute)
     attribute = attribute.downcase
     @queue = @queue.sort_by { |row| row[attribute] }
-    queue_print
+    return  queue_print
   end
+
   def queue_clear
     @queue = {}  
   end
@@ -102,7 +121,9 @@ class EventReporter
   def queue_save_to(filename)
      new_file = File.open filename,"w"
      new_file.write(queue_print)
+     puts "Writing #{filename}"
      new_file.close
+     puts "#{filename} written."
   end
 
   def attributes
@@ -110,7 +131,7 @@ class EventReporter
   end
 
   def find(input_attribute, criteria)
-   criteria = criteria.to_s.rstrip
+   criteria = criteria.to_s.rstrip.downcase
    # dc_attribute =  attributes.find { |attribute| attribute.eql?(input_attribute.downcase)}
    @queue = @loaded_array.select { |attendee| attendee[input_attribute] == criteria}
   end

@@ -9,11 +9,11 @@ class Attendee
     @first_name =  input[:first_name].nil? ?  "" : input[:first_name].downcase.strip 
     @last_name = input[:last_name].nil? ? "" : input[:last_name].downcase.strip 
     @homephone = input[:homephone].nil? ? "0000000000" : clean_phone_number(input[:homephone])
-    @email_address = input[:email_address].nil? ? "" : input[:email_address].strip 
-    @street = input[:street].nil? ? "" : input[:street].strip 
-    @city = input[:city].nil? ? "" : input[:city].strip 
-    @state = input[:state].nil? ? "" : input[:state].strip 
-    @zipcode = input[:zipcode].nil? ? "" : clean_zipcode(input[:zipcode].strip)
+    @email_address = input[:email_address].nil? ? "" : input[:email_address].downcase.strip 
+    @street = input[:street].nil? ? "" : input[:street].downcase.strip 
+    @city = input[:city].nil? ? "" : input[:city].downcase.strip 
+    @state = input[:state].nil? ? "" : input[:state].downcase.strip 
+    @zipcode = input[:zipcode].nil? ? "" : clean_zipcode(input[:zipcode].downcase.strip)
   end
 
   def clean_zipcode(zipcode)
