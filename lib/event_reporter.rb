@@ -1,10 +1,11 @@
 require 'CSV'
-
+require './lib/attendee'
+require 'pry'
 class EventReporter
- attr_accessor :queue
+ attr_accessor :queue, :attributes
 
   def initialize
-   @queue = Array.new 
+   @queue = {} 
   end
   def command(input)
     words = input.split(" ")
@@ -15,12 +16,26 @@ class EventReporter
       # return "loading #{words[1]}"
       file_loader(words[1]) 
     elsif command == "queue"
-      queue_count
+      queue_router(input)
     elsif command == "find"
       find(words[1], words[2])
     else 
       "That is an invalid command see 'help' for list off all commands"
     end
+  end
+
+  def queue_router(input)
+     if input == 'queue count'
+       queue_count
+     elsif input == 'queue clear'
+       queue_clear
+     elsif input == 'queue print'
+       queue_print
+     elsif input.start_with?('queue save to')
+       queue_save_to(input.split(' ')[-1])
+     else
+       "Not a valid queue command."
+     end
   end
 
   def help_router(command)
@@ -44,17 +59,59 @@ class EventReporter
   end
 
   def file_loader(filename)
-    filename ||= "event_attendees.csv" 
-    input_file = CSV.open filename, headers: true, header_converters: :symbol
-    @csv = Attendee.new(input_file)
+    filename ||= "event_attendees.csv"
+  
+    input_file = CSV.read filename, headers: true, header_converters: :symbol
+    @loaded_array = map_csv_attendees_instant_variables_to_hash(input_file)
   end  
 
-  def queue_count
-   queue.count.to_s
+  def map_csv_attendees_instant_variables_to_hash(csv_file)
+    csv_file.collect do |row|
+      attendee =  Attendee.new(row.to_hash)
+      attendee_hash = {}
+      attendee.instance_variables.each do |var|
+        attendee_hash[var.to_s.delete("@")] = attendee.instance_variable_get(var)
+       end
+       attendee_hash
+    end
   end
 
-  def find(attribute, criteria)
-    criteria = criteria.to_s.downcase.rstrip
-   @queue = @csv.find_all { |row| row[attribute.to_sym] == criteria }
+  def queue_count
+    puts  queue.count.to_s || "queue count error"
+  end
+
+  def queue_print
+     header = "\t#{'LAST NAME'.center(12, ' ')}\t#{'FIRST NAME'.center(12, ' ')}\t#{'EMAIL'.center(44, ' ')}\t#{'ZIPCODE'.center(12, ' ')}\t#{'CITY'.center(12, ' ')}\t#{'STATE'.center(12, ' ')}\t#{'ADDRESS'.center(40, ' ')}\t#{'PHONE'.center(12, ' ')}"
+      data = queue.collect do |row|
+      "\t#{row['last_name'].center(12, ' ')}\t#{row['first_name'].center(12, ' ')}\t#{row['email_address'].center(44, ' ')}\t#{row['zipcode'].center(12, ' ')}\t#{row['city'].center(12, ' ')}\t#{row['state'].center(12, ' ')}\t#{row['street'].center(40, ' ')}\t#{row['homephone'].center(12, ' ')}"
+    end
+   
+    results = header + "\n" + data.join("\n")
+    return results
+  end
+
+  def queue_print_by(attribute)
+    attribute = attribute.downcase
+    @queue = @queue.sort_by { |row| row[attribute] }
+    queue_print
+  end
+  def queue_clear
+    @queue = {}  
+  end
+  
+  def queue_save_to(filename)
+     new_file = File.open filename,"w"
+     new_file.write(queue_print)
+     new_file.close
+  end
+
+  def attributes
+     ["id", "first_name", "last_name", "email_address","zipcode", "homephone", "address", "city", "state"]
+  end
+
+  def find(input_attribute, criteria)
+   criteria = criteria.to_s.rstrip
+   # dc_attribute =  attributes.find { |attribute| attribute.eql?(input_attribute.downcase)}
+   @queue = @loaded_array.select { |attendee| attendee[input_attribute] == criteria}
   end
 end
