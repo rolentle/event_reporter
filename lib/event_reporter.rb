@@ -11,7 +11,7 @@ class EventReporter
   def run
     puts "Welcome to Event Reporter"
     input = "" 
-    while input != 'quit'
+    until input == 'quit' 
       print "Enter command:"
       input = gets.chomp
       command(input)
@@ -127,12 +127,12 @@ class EventReporter
   end
 
   def attributes
-     ["id", "first_name", "last_name", "email_address","zipcode", "homephone", "address", "city", "state"]
+     ["id", "first_name", "last_name", "email_address","zipcode", "homephone", "street", "city", "state"]
   end
 
   def find(input_attribute, criteria)
-   criteria = criteria.to_s.rstrip.downcase
+   criteria = criteria.to_s.strip.downcase
    # dc_attribute =  attributes.find { |attribute| attribute.eql?(input_attribute.downcase)}
-   @queue = @loaded_array.select { |attendee| attendee[input_attribute] == criteria}
+  @queue = @loaded_array.select { |attendee| attendee[input_attribute] == criteria}
   end
 end
