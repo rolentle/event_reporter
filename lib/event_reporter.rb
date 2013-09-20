@@ -1,17 +1,18 @@
 require 'CSV'
 require './lib/attendee'
 require 'pry'
+
 class EventReporter
  attr_accessor :queue, :attributes
 
   def initialize
-   @queue = {} 
+   @queue = [] 
   end
 
   def run
     puts "Welcome to Event Reporter"
     input = "" 
-    until input == 'quit' 
+    while input != 'quit'
       print "Enter command:"
       input = gets.chomp
       command(input)
@@ -24,7 +25,6 @@ class EventReporter
     if command == "help"
       help_router(input)
     elsif command == "load"
-      # return "loading #{words[1]}"
       file_loader(words[1]) 
     elsif command == "queue"
       queue_router(input)
@@ -38,6 +38,7 @@ class EventReporter
   end
 
   def queue_router(input)
+       
      if input == 'queue count'
        queue_count
      elsif input == 'queue clear'
@@ -56,24 +57,41 @@ class EventReporter
      end
   end
 
-  def help_router(command)
-     if  command == "help"
-      "load <filename>\nhelp\nhelp <command>\nqueue count\nqueue clear\nqueue print\nqueue print by <attribute>\nqueue save to <filename.csv>\nfind <attribute> <criteria>" 
-    elsif command == "help load <filename>"
-      "Erase any loaded data and parse the specified file. If no filename is given, default to event_attendees.csv."
-    elsif command == "help queue count"
-      "Output how many records are in the current queue."
-    elsif command == "help queue clear"
-      "Empties the queue."
-    elsif command == "help queue print"
-      "Print out a tab-delimited data table with a header row following this format:\nlast_name\nfirst_name\nemail_address\nzipcode\ncity\nstate\nstreet\nphone"
-    elsif command == "help queue print by <attribute>"
-      "Print out a tab-delimited data table sorted by selected attribute:\nlast_name\nfirst_name\nemail_address\nzipcode\ncity\nstate\nstreet\nphone"
-    elsif command == "help queue save to <filename.csv>"
-      "Export the current queue to the specified filename as a CSV. The file should should include data and headers for last name, first name, email, zipcode, city, state, address, and phone number."
-    elsif command == "help find <attribute> <criteria>"
-      "Loads the queue with all records matching the criteria(case sensitive) for the given attribute:\nlast_name\nfirst_name\nemail_address\nzipcode\ncity\nstate\nstreet\nphone"
-    end
+   def attributes
+     {"id" => {"alignment" => 12},
+     "last_name"=> {"alignment" => 12},
+     "first_name"=> {"alignment" => 12},
+     "email_address"=> {"alignment" => 44},
+     "zipcode"=> {"alignment" => 12},
+     "city"=> {"alignment" => 12},
+     "street"=> {"alignment" => 40},
+     "state"=> {"alignment" => 12},
+     "homephone"=> {"alignment" => 12}}
+  end
+  def help_router(input)
+     if  input == "help"
+       puts "The acceptable commands are:\n#{commands.collect { |k,v| "#{k.ljust(20)}\t#{v}"}.join("\n")}"
+     else 
+       help_command = input.split[1..-1].join(" ") 
+        puts commands[help_command]
+     end 
+  end
+
+  def commands
+    {"load <filename>"=>
+    "Erase any loaded data and parse the specified file. If no filename is given, default to event_attendees.csv.",
+    "queue count" => 
+    "Output how many records are in the current queue.",
+    "queue clear" =>
+    "Empties the queue.",
+    "queue print"=> 
+    "Print out a tab-delimited data table with a header row following this format:\n\t#{attributes.keys[1..-1].join("\n  \t")}",
+    "queue print by <attribute>" =>
+    "Print out a tab-delimited data table sorted by selected attribute:\n\t#{attributes.keys[1..-1].join("\n  \t")}",
+    "queue save to <filename.csv>" => 
+    "Export the current queue to the specified filename as a CSV. The file should should include data and headers",
+    "find <attribute> <criteria>"=>
+    "Loads the queue with all records matching the criteria(case sensitive) for the given attribute:\n\t#{attributes.keys[1..-1].join("\n  \t")}"}
   end
 
   def file_loader(filename)
@@ -99,10 +117,11 @@ class EventReporter
   end
 
   def queue_print
-     header = "\t#{'last_name'.center(12, ' ')}\t#{'first_name'.center(12, ' ')}\t#{'email_address'.center(44, ' ')}\t#{'zipcode'.center(12, ' ')}\t#{'city'.center(12, ' ')}\t#{'state'.center(12, ' ')}\t#{'street'.center(40, ' ')}\t#{'homephone'.center(12, ' ')}"
-      data = queue.collect do |row|
-      "\t#{row['last_name'].center(12, ' ')}\t#{row['first_name'].center(12, ' ')}\t#{row['email_address'].center(44, ' ')}\t#{row['zipcode'].center(12, ' ')}\t#{row['city'].center(12, ' ')}\t#{row['state'].center(12, ' ')}\t#{row['street'].center(40, ' ')}\t#{row['homephone'].center(12, ' ')}"
+    header =  attributes.collect { |k,v| "#{k.center(v['alignment'])}" }.join("\t")
+    data = queue.collect do |row|
+      attributes.collect { |k,v| "#{row[k].center(v['alignment'])}" }.join("\t")   
     end
+
     results = header + "\n" + data.join("\n")
     puts results
     return results
@@ -126,13 +145,9 @@ class EventReporter
      puts "#{filename} written."
   end
 
-  def attributes
-     ["id", "first_name", "last_name", "email_address","zipcode", "homephone", "street", "city", "state"]
-  end
 
   def find(input_attribute, criteria)
-   criteria = criteria.to_s.strip.downcase
-   # dc_attribute =  attributes.find { |attribute| attribute.eql?(input_attribute.downcase)}
-  @queue = @loaded_array.select { |attendee| attendee[input_attribute] == criteria}
+   criteria = criteria.to_s.rstrip.downcase
+   @queue = @loaded_array.select { |attendee| attendee[input_attribute] == criteria}
   end
 end
