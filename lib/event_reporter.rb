@@ -58,7 +58,15 @@ class EventReporter
   end
 
    def attributes
-     ["id","last_name", "first_name", "email_address","zipcode","city", "street",  "state","homephone"]
+     {"id" => {"alignment" => 12},
+     "last_name"=> {"alignment" => 12},
+     "first_name"=> {"alignment" => 12},
+     "email_address"=> {"alignment" => 44},
+     "zipcode"=> {"alignment" => 12},
+     "city"=> {"alignment" => 12},
+     "street"=> {"alignment" => 40},
+     "state"=> {"alignment" => 12},
+     "homephone"=> {"alignment" => 12}}
   end
   def help_router(input)
      if  input == "help"
@@ -77,13 +85,13 @@ class EventReporter
     "queue clear" =>
     "Empties the queue.",
     "queue print"=> 
-    "Print out a tab-delimited data table with a header row following this format:\n\t#{attributes[1..-1].join("\n  \t")}",
+    "Print out a tab-delimited data table with a header row following this format:\n\t#{attributes.keys[1..-1].join("\n  \t")}",
     "queue print by <attribute>" =>
-    "Print out a tab-delimited data table sorted by selected attribute:\n\t#{attributes[1..-1].join("\n  \t")}",
+    "Print out a tab-delimited data table sorted by selected attribute:\n\t#{attributes.keys[1..-1].join("\n  \t")}",
     "queue save to <filename.csv>" => 
     "Export the current queue to the specified filename as a CSV. The file should should include data and headers",
     "find <attribute> <criteria>"=>
-    "Loads the queue with all records matching the criteria(case sensitive) for the given attribute:\n\t#{attributes[1..-1].join("\n  \t")}"}
+    "Loads the queue with all records matching the criteria(case sensitive) for the given attribute:\n\t#{attributes.keys[1..-1].join("\n  \t")}"}
   end
 
   def file_loader(filename)
@@ -109,9 +117,10 @@ class EventReporter
   end
 
   def queue_print
-     header = "\t#{'last_name'.center(12)}\t#{'first_name'.center(12)}\t#{'email_address'.center(44)}\t#{'zipcode'.center(12)}\t#{'city'.center(12)}\t#{'state'.center(12)}\t#{'street'.center(40)}\t#{'homephone'.center(12)}"
-      data = queue.collect do |row|
-      "\t#{row['last_name'].center(12)}\t#{row['first_name'].center(12)}\t#{row['email_address'].center(44)}\t#{row['zipcode'].center(12)}\t#{row['city'].center(12)}\t#{row['state'].center(12)}\t#{row['street'].center(40)}\t#{row['homephone'].center(12)}"
+    header =  attributes.collect { |k,v| "#{k.center(v['alignment'])}" }.join("\t")
+    data = queue.collect do |row|
+      attributes.collect { |k,v| "#{row[k].center(v['alignment'])}" }.join("\t")   
+     # "\t#{row['last_name'].center(12)}\t#{row['first_name'].center(12)}\t#{row['email_address'].center(44)}\t#{row['zipcode'].center(12)}\t#{row['city'].center(12)}\t#{row['state'].center(12)}\t#{row['street'].center(40)}\t#{row['homephone'].center(12)}"
     end
     results = header + "\n" + data.join("\n")
     puts results
